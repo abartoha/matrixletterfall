@@ -1,7 +1,16 @@
 import os
+import sys
 import pygame as pg
 from random import choice, randrange
 
+# Determine the base directory (for bundled files)
+if getattr(sys, 'frozen', False):  # Running as a PyInstaller bundled app
+    base_path = sys._MEIPASS
+else:  # Running as a script
+    base_path = os.path.dirname(os.path.abspath(__file__))
+
+# Path to the font file
+font_path = os.path.join(base_path, "MS_mincho.ttf")
 
 class Symbol:
     def __init__(self, x, y, speed):
@@ -40,7 +49,7 @@ surface.set_alpha(alpha_value)
 clock = pg.time.Clock()
 
 katakana = [chr(int('0x30a0', 16) + i) for i in range(96)]
-font = pg.font.Font("MS_mincho.ttf", FONT_SIZE, bold=True)
+font = pg.font.Font("MS_mincho.ttf", FONT_SIZE)
 green_katakana = [font.render(char, True, (40, randrange(160, 256), 10)) for char in katakana]
 lightgreen_katakana = [font.render(char, True, pg.Color('lightgreen')) for char in katakana]
 
@@ -57,7 +66,11 @@ while True:
         alpha_value += 6
         surface.set_alpha(alpha_value)
 
-    [exit() for i in pg.event.get() if i.type == pg.QUIT]
+    for event in pg.event.get():
+        if event.type == pg.QUIT:
+            os._exit(0)
+        elif event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
+            os._exit(0)
     pg.display.flip()
     indent += 1
     clock.tick(60)
